@@ -12,6 +12,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------
 
+using Microsoft.Azure.Commands.Common.Exceptions;
 using Microsoft.Azure.Commands.KeyVault.Models;
 using Microsoft.Azure.Commands.KeyVault.Properties;
 using Microsoft.Azure.Commands.ResourceManager.Common.ArgumentCompleters;
@@ -271,11 +272,17 @@ namespace Microsoft.Azure.Commands.KeyVault
 
         [Parameter(Mandatory = true,
             ParameterSetName = HsmInteractiveCreateParameterSet,
-            HelpMessage = "Specifies the key type of this key.")]
+            HelpMessage = "Specifies the key type of this key. When importing BYOK keys, it defaults to 'RSA'.")]
         [Parameter(Mandatory = true,
             ParameterSetName = HsmInputObjectCreateParameterSet)]
         [Parameter(Mandatory = true,
             ParameterSetName = HsmResourceIdCreateParameterSet)]
+        [Parameter(Mandatory = false,
+            ParameterSetName = InteractiveImportParameterSet)]
+        [Parameter(Mandatory = false,
+            ParameterSetName = InputObjectImportParameterSet)]
+        [Parameter(Mandatory = false,
+            ParameterSetName = ResourceIdImportParameterSet)]
         [PSArgumentCompleter("RSA", "EC", "oct")]
         public string KeyType { get; set; }
 
@@ -286,6 +293,12 @@ namespace Microsoft.Azure.Commands.KeyVault
             ParameterSetName = HsmInputObjectCreateParameterSet)]
         [Parameter(Mandatory = false,
             ParameterSetName = HsmResourceIdCreateParameterSet)]
+        [Parameter(Mandatory = false,
+            ParameterSetName = InteractiveImportParameterSet)]
+        [Parameter(Mandatory = false,
+            ParameterSetName = InputObjectImportParameterSet)]
+        [Parameter(Mandatory = false,
+            ParameterSetName = ResourceIdImportParameterSet)]
         [PSArgumentCompleter("P-256", "P-256K", "P-384", "P-521")]
         public string CurveName { get; set; }
         #endregion
@@ -405,6 +418,8 @@ namespace Microsoft.Azure.Commands.KeyVault
 
         internal JsonWebKey CreateWebKeyFromFile()
         {
+            ThrowIfEcWithoutCurveName();
+
             FileInfo keyFile = new FileInfo(this.GetUnresolvedProviderPathFromPSPath(this.KeyFilePath));
             if (!keyFile.Exists)
             {
@@ -412,19 +427,39 @@ namespace Microsoft.Azure.Commands.KeyVault
             }
 
             var converterChain = WebKeyConverterFactory.CreateConverterChain();
-            return converterChain.ConvertKeyFromFile(keyFile, KeyFilePassword);
+            var converterExtraInfo = IsEC(KeyType) ?
+                new WebKeyConverterExtraInfo()
+                {
+                    KeyType = JsonWebKeyType.EllipticCurveHsm, // todo: move logic to converter
+                    CurveName = CurveName
+                }
+                : null;
+
+            return converterChain.ConvertKeyFromFile(keyFile, KeyFilePassword, converterExtraInfo);
         }
 
-        internal Track2Sdk.JsonWebKey CreateTrack2WebKeyFromFile()
+        private void ThrowIfEcWithoutCurveName()
         {
-            FileInfo keyFile = new FileInfo(this.GetUnresolvedProviderPathFromPSPath(this.KeyFilePath));
-            if (!keyFile.Exists)
+            if (IsEC(KeyType) && string.IsNullOrEmpty(CurveName))
             {
-                throw new FileNotFoundException(string.Format(Resources.KeyFileNotFound, this.KeyFilePath));
+                throw new AzPSArgumentException("Please input a valid 'CurveName' when KeyType is 'EC'", nameof(CurveName));
             }
-
-            var converterChain = WebKeyConverterFactory.CreateConverterChain();
-            return converterChain.ConvertToTrack2SdkKeyFromFile(keyFile, KeyFilePassword);
         }
+
+        private bool IsEC(string keyType) =>
+            string.Equals(keyType, JsonWebKeyType.EllipticCurve, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(keyType, JsonWebKeyType.EllipticCurveHsm, StringComparison.OrdinalIgnoreCase);
+
+    internal Track2Sdk.JsonWebKey CreateTrack2WebKeyFromFile()
+    {
+        FileInfo keyFile = new FileInfo(this.GetUnresolvedProviderPathFromPSPath(this.KeyFilePath));
+        if (!keyFile.Exists)
+        {
+            throw new FileNotFoundException(string.Format(Resources.KeyFileNotFound, this.KeyFilePath));
+        }
+
+        var converterChain = WebKeyConverterFactory.CreateConverterChain();
+        return converterChain.ConvertToTrack2SdkKeyFromFile(keyFile, KeyFilePassword);
     }
+}
 }

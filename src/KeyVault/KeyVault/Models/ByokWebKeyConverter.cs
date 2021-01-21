@@ -19,6 +19,7 @@ using KeyVaultProperties = Microsoft.Azure.Commands.KeyVault.Properties;
 using Track2Sdk = Azure.Security.KeyVault.Keys;
 using Track1Sdk = Microsoft.Azure.KeyVault.WebKey;
 using System.Security.Cryptography;
+using Microsoft.Azure.KeyVault.WebKey;
 
 namespace Microsoft.Azure.Commands.KeyVault.Models
 {
@@ -72,7 +73,7 @@ namespace Microsoft.Azure.Commands.KeyVault.Models
                 T = byokBlob,
             };
         }
-        
+
         private Track2Sdk.JsonWebKey ConvertToTrack2SdkJsonWebKey(string byokFileName)
         {
             byte[] byokBlob = File.ReadAllBytes(byokFileName);
@@ -85,6 +86,18 @@ namespace Microsoft.Azure.Commands.KeyVault.Models
                  KeyType = Track2Sdk.KeyType.RsaHsm,
                  T = byokBlob,
              };
+        }
+
+        public JsonWebKey ConvertKeyFromFile(FileInfo fileInfo, SecureString password, WebKeyConverterExtraInfo extraInfo = null)
+        {
+            var jwk = ConvertKeyFromFile(fileInfo, password);
+            if (string.IsNullOrEmpty(extraInfo.KeyType)) {
+                jwk.Kty = extraInfo.KeyType;
+            }
+            if (string.IsNullOrEmpty(extraInfo.CurveName)) {
+                jwk.CurveName = extraInfo.CurveName;
+            }
+            return jwk;
         }
 
         private IWebKeyConverter next;

@@ -79,7 +79,7 @@ namespace Microsoft.Azure.Commands.KeyVault.Models
 
             return CreateJWK(key);
         }
-         
+
         private Track2Sdk.JsonWebKey ConvertToTrack2SdkJsonWebKey(string pfxFileName, SecureString pfxPassword)
         {
             X509Certificate2 certificate;
@@ -103,7 +103,7 @@ namespace Microsoft.Azure.Commands.KeyVault.Models
             // to do: support converting oct to jsonwebKey
 
             throw new ArgumentException(string.Format(KeyVaultProperties.Resources.ImportNotSupported, "oct-HSM"));
-            
+
         }
 
         private static Track1Sdk.JsonWebKey CreateJWK(RSA rsa)
@@ -151,7 +151,7 @@ namespace Microsoft.Azure.Commands.KeyVault.Models
 
         private static Track2Sdk.JsonWebKey CreateTrack2SdkJWK(ECDsa ecdSa)
         {
-            if (ecdSa == null) 
+            if (ecdSa == null)
             {
                 throw new ArgumentNullException("ecdSa");
             }
@@ -172,6 +172,11 @@ namespace Microsoft.Azure.Commands.KeyVault.Models
         }
 
         private static Track2Sdk.JsonWebKey CreateTrack2SdkJWK(Aes aes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public JsonWebKey ConvertKeyFromFile(FileInfo fileInfo, SecureString password, WebKeyConverterExtraInfo extraInfo = null)
         {
             throw new NotImplementedException();
         }
