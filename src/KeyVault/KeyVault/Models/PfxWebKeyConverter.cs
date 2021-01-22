@@ -20,7 +20,6 @@ using System.Security.Cryptography.X509Certificates;
 using KeyVaultProperties = Microsoft.Azure.Commands.KeyVault.Properties;
 using Track2Sdk = Azure.Security.KeyVault.Keys;
 using Track1Sdk = Microsoft.Azure.KeyVault.WebKey;
-using Microsoft.Azure.KeyVault.WebKey;
 
 namespace Microsoft.Azure.Commands.KeyVault.Models
 {
@@ -31,12 +30,12 @@ namespace Microsoft.Azure.Commands.KeyVault.Models
             this.next = next;
         }
 
-        public Track1Sdk.JsonWebKey ConvertKeyFromFile(FileInfo fileInfo, SecureString password)
+        public Track1Sdk.JsonWebKey ConvertKeyFromFile(FileInfo fileInfo, SecureString password, WebKeyConverterExtraInfo extraInfo = null)
         {
             if (CanProcess(fileInfo))
                 return Convert(fileInfo.FullName, password);
             if (next != null)
-                return next.ConvertKeyFromFile(fileInfo, password);
+                return next.ConvertKeyFromFile(fileInfo, password, extraInfo);
             throw new ArgumentException(string.Format(KeyVaultProperties.Resources.UnsupportedFileFormat, fileInfo.Name));
         }
 
@@ -172,11 +171,6 @@ namespace Microsoft.Azure.Commands.KeyVault.Models
         }
 
         private static Track2Sdk.JsonWebKey CreateTrack2SdkJWK(Aes aes)
-        {
-            throw new NotImplementedException();
-        }
-
-        public JsonWebKey ConvertKeyFromFile(FileInfo fileInfo, SecureString password, WebKeyConverterExtraInfo extraInfo = null)
         {
             throw new NotImplementedException();
         }

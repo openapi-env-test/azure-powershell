@@ -13,6 +13,7 @@
 // ----------------------------------------------------------------------------------
 
 using Microsoft.Azure.Commands.Common.Exceptions;
+using Microsoft.Azure.Commands.KeyVault.Helpers;
 using Microsoft.Azure.Commands.KeyVault.Models;
 using Microsoft.Azure.Commands.KeyVault.Properties;
 using Microsoft.Azure.Commands.ResourceManager.Common.ArgumentCompleters;
@@ -427,39 +428,35 @@ namespace Microsoft.Azure.Commands.KeyVault
             }
 
             var converterChain = WebKeyConverterFactory.CreateConverterChain();
-            var converterExtraInfo = IsEC(KeyType) ?
-                new WebKeyConverterExtraInfo()
-                {
-                    KeyType = JsonWebKeyType.EllipticCurveHsm, // todo: move logic to converter
-                    CurveName = CurveName
-                }
-                : null;
+            var converterExtraInfo = new WebKeyConverterExtraInfo()
+            {
+                KeyType = KeyType,
+                CurveName = CurveName
+            };
 
             return converterChain.ConvertKeyFromFile(keyFile, KeyFilePassword, converterExtraInfo);
         }
 
         private void ThrowIfEcWithoutCurveName()
         {
-            if (IsEC(KeyType) && string.IsNullOrEmpty(CurveName))
+            if (JwkHelper.IsEC(KeyType) && string.IsNullOrEmpty(CurveName))
             {
                 throw new AzPSArgumentException("Please input a valid 'CurveName' when KeyType is 'EC'", nameof(CurveName));
             }
         }
 
-        private bool IsEC(string keyType) =>
-            string.Equals(keyType, JsonWebKeyType.EllipticCurve, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(keyType, JsonWebKeyType.EllipticCurveHsm, StringComparison.OrdinalIgnoreCase);
 
-    internal Track2Sdk.JsonWebKey CreateTrack2WebKeyFromFile()
-    {
-        FileInfo keyFile = new FileInfo(this.GetUnresolvedProviderPathFromPSPath(this.KeyFilePath));
-        if (!keyFile.Exists)
+
+        internal Track2Sdk.JsonWebKey CreateTrack2WebKeyFromFile()
         {
-            throw new FileNotFoundException(string.Format(Resources.KeyFileNotFound, this.KeyFilePath));
-        }
+            FileInfo keyFile = new FileInfo(this.GetUnresolvedProviderPathFromPSPath(this.KeyFilePath));
+            if (!keyFile.Exists)
+            {
+                throw new FileNotFoundException(string.Format(Resources.KeyFileNotFound, this.KeyFilePath));
+            }
 
-        var converterChain = WebKeyConverterFactory.CreateConverterChain();
-        return converterChain.ConvertToTrack2SdkKeyFromFile(keyFile, KeyFilePassword);
+            var converterChain = WebKeyConverterFactory.CreateConverterChain();
+            return converterChain.ConvertToTrack2SdkKeyFromFile(keyFile, KeyFilePassword);
+        }
     }
-}
 }
