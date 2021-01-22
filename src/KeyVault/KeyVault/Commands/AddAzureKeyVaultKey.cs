@@ -441,7 +441,7 @@ namespace Microsoft.Azure.Commands.KeyVault
         {
             if (JwkHelper.IsEC(KeyType) && string.IsNullOrEmpty(CurveName))
             {
-                throw new AzPSArgumentException("Please input a valid 'CurveName' when KeyType is 'EC'", nameof(CurveName));
+                throw new AzPSArgumentException(Resources.EcButNoCurveName, nameof(CurveName));
             }
         }
 

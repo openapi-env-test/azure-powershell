@@ -518,7 +518,7 @@ Accept wildcard characters: False
 ```
 
 ### -KeyType
-Specifies the key type of this key.
+Specifies the key type of this key. When importing BYOK keys, it defaults to 'RSA'.
 
 ```yaml
 Type: System.String

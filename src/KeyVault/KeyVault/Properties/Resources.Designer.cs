@@ -406,6 +406,15 @@ namespace Microsoft.Azure.Commands.KeyVault.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please input a valid &apos;CurveName&apos; when KeyType is &apos;EC&apos;.
+        /// </summary>
+        internal static string EcButNoCurveName {
+            get {
+                return ResourceManager.GetString("EcButNoCurveName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Overwrite File ?.
         /// </summary>
         internal static string FileOverwriteCaption {
