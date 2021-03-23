@@ -1,0 +1,48 @@
+namespace Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Models.Api20210128Preview
+{
+    using static Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Runtime.Extensions;
+
+    /// <summary>
+    /// A container holding only the Tags for a resource, allowing the user to update the tags on a PrivateLinkScope instance.
+    /// </summary>
+    public partial class TagsResource :
+        Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Models.Api20210128Preview.ITagsResource,
+        Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Models.Api20210128Preview.ITagsResourceInternal
+    {
+
+        /// <summary>Backing field for <see cref="Tag" /> property.</summary>
+        private Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Models.Api20210128Preview.ITagsResourceTags _tag;
+
+        /// <summary>Resource tags</summary>
+        [Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Origin(Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.PropertyOrigin.Owned)]
+        public Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Models.Api20210128Preview.ITagsResourceTags Tag { get => (this._tag = this._tag ?? new Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Models.Api20210128Preview.TagsResourceTags()); set => this._tag = value; }
+
+        /// <summary>Creates an new <see cref="TagsResource" /> instance.</summary>
+        public TagsResource()
+        {
+
+        }
+    }
+    /// A container holding only the Tags for a resource, allowing the user to update the tags on a PrivateLinkScope instance.
+    public partial interface ITagsResource :
+        Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Runtime.IJsonSerializable
+    {
+        /// <summary>Resource tags</summary>
+        [Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Runtime.Info(
+        Required = false,
+        ReadOnly = false,
+        Description = @"Resource tags",
+        SerializedName = @"tags",
+        PossibleTypes = new [] { typeof(Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Models.Api20210128Preview.ITagsResourceTags) })]
+        Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Models.Api20210128Preview.ITagsResourceTags Tag { get; set; }
+
+    }
+    /// A container holding only the Tags for a resource, allowing the user to update the tags on a PrivateLinkScope instance.
+    internal partial interface ITagsResourceInternal
+
+    {
+        /// <summary>Resource tags</summary>
+        Microsoft.Azure.PowerShell.Cmdlets.HybridCompute.Models.Api20210128Preview.ITagsResourceTags Tag { get; set; }
+
+    }
+}
